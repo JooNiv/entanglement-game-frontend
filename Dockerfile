@@ -29,6 +29,10 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # copy custom nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+RUN mkdir -p /var/cache/nginx /var/run/nginx \
+	&& chmod -R 0777 /var/cache/nginx /var/run/nginx \
+	&& sed -i 's/^user .*;/# &/' /etc/nginx/nginx.conf || true
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
