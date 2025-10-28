@@ -22,9 +22,9 @@ function App() {
   const [validQubits, setValidQubits] = useState(q1 !== q2);
   const [options, setOptions] = useState({
     itemCount: leaderboard.length,
-    itemsPerPage: 5,
+    itemsPerPage: 10,
     currentPage: 1,
-    pageSizes: [5, 10, 15, 20, 40]
+    pageSizes: [10, 15, 20, 40]
   });
   const resultsRef = useRef(null);
   const selectedRef = useRef(null);
@@ -39,8 +39,6 @@ function App() {
   const adminUsername = import.meta.env.VITE_adminUsername || "admin";
   const qubitTogglePassword = import.meta.env.VITE_qubitTogglePassword || "password";
   const backendUrl = import.meta.env.VITE_backendUrl || "";
-
-  const isInitialLoad = useRef(true);
 
   useEffect(() => {
 
@@ -103,18 +101,7 @@ function App() {
   const onPageChange = (newOptions) => {
     setOptions(prev => ({ ...prev, ...newOptions }));
 
-    // Skip scrolling on initial load
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false;
-      return;
-    }
-
-    const thisElement = document.getElementById("leaderboard");
-    if (thisElement) {
-      const yOffset = -80; // Account for navbar
-      const y = thisElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
+    
   };
 
   // Keep pagination itemCount in sync with number of leaderboard entries
@@ -255,11 +242,10 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-12 p-6 mb-12">
-      <div className="flex flex-col gap-6 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-          <div id="input" className="col-span-1 border border-gray-200 p-4 rounded-lg shadow-lg">
+    <div className="flex flex-col lg:flex-row gap-12 p-2 sm:p-6 mb-4 sm:mb-12">
+      <div className="flex flex-col gap-0 sm:gap-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-6">
+          <div id="input" className="col-span-1 border border-gray-200 p-4 sm:p-4 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold">Choose Your Qubits</h2>
             <form onSubmit={handleSubmit} className="mt-4">
               <label>
@@ -327,7 +313,7 @@ function App() {
             </form>
           </div>
 
-          <div id="bell-circuit" className="h-min col-span-1 border border-gray-200 p-4 rounded-lg shadow-lg">
+          <div id="bell-circuit" className="h-min col-span-1 border border-gray-200 p-2 sm:p-4 rounded-lg shadow-lg">
             <p className="text-2xl font-bold">Optimal circuit</p>
             <img src="/bell-circuit.png" alt="Bell Circuit" />
           </div>
@@ -335,7 +321,7 @@ function App() {
 
 
         {(result) &&
-          <div id="score" ref={resultsRef} className="flex flex-col gap-4 border border-gray-200 p-4 rounded-lg shadow-lg">
+          <div id="score" ref={resultsRef} className="flex flex-col gap-4 border border-gray-200 p-2 sm:p-4 rounded-lg shadow-lg">
             <div className="">
               <h4 className="text-2xl font-bold">Score:</h4>
             </div>
@@ -392,9 +378,9 @@ function App() {
         </div>
       </div>
       <div className="w-full lg:w-[70%] 2xl:w-[100%] h-min">
-        <div id="leaderboard" className="h-min border border-gray-200 p-4 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Leaderboard</h2>
+        <div id="leaderboard" className="h-min border border-gray-200 pl-4 sm:pl-4 p-4 rounded-lg shadow-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+            <h2 className="text-2xl pl-2 pb-2 sm:pl-0 sm:pb-0 font-bold">Leaderboard</h2>
             <div className="flex">
               {isAdmin && (<CButton onClick={handleSetShowQubits} className="ml-2 mb-2">Show Qubits</CButton>)}
               <CButton onClick={fetchLeaderboard} className="ml-2 mb-2">Refresh</CButton>
@@ -403,14 +389,22 @@ function App() {
           {leaderboard.length === 0 ? (
             <p>No entries yet</p>
           ) : (
-            <>
+            <div className="flex flex-col justify-start items-start sm:items-end w-full">
               <CPagination
                 value={options}
                 //hideDetails
                 onChangeValue={onPageChange}
                 control
+                className="hidden sm:flex"
               />
-              <CTable>
+              <CPagination
+                value={options}
+                hideDetails
+                onChangeValue={onPageChange}
+                control
+                className="flex sm:hidden"
+              />
+              <CTable responsive mobileBreakpoint={400} className="w-full">
                 <table border="1" cellPadding="5">
                   <thead>
                     <tr>
@@ -450,14 +444,17 @@ function App() {
                         </tr>
                       )
                     })}
-                  </tbody>
-                </table>
-              </CTable>
-
-            </>
-          )}
-        </div>
-        {/* Selected run bar plot */}
+                    </tbody>
+                  </table>
+                  </CTable>
+                  <CButton className="self-start mt-2 sm:mt-4" onClick={() => {
+                  const el = document.getElementById('leaderboard');
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}>Scroll up</CButton>
+                </div>
+                )}
+              </div>
+              {/* Selected run bar plot */}
         {(selectedResult) && (
           <div ref={selectedRef} className="w-full mt-4 border border-gray-200 p-4 rounded-lg shadow-lg">
             <div className="flex items-center justify-between">
