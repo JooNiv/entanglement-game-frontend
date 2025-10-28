@@ -29,9 +29,10 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # copy custom nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN mkdir -p /var/cache/nginx /var/run/nginx /run \
-    && chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run/nginx || true \
-    && chmod -R 0755 /usr/share/nginx/html /var/cache/nginx /var/run/nginx
+RUN mkdir -p /var/cache/nginx/client_temp /var/run/nginx /run \
+    && chown -R nginx:nginx /usr/share/nginx/html || true \
+    && chmod -R 0755 /usr/share/nginx/html \
+    && chmod -R 0777 /var/cache/nginx /var/run/nginx /run
 
 EXPOSE 80
 
