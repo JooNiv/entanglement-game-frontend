@@ -34,6 +34,6 @@ RUN mkdir -p /var/cache/nginx/client_temp /var/run/nginx /run \
     && chmod -R 0755 /usr/share/nginx/html \
     && chmod -R 0777 /var/cache/nginx /var/run/nginx /run
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
