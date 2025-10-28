@@ -3,9 +3,11 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        VITE_backendUrl: ${VITE_backendUrl}
+        VITE_qubitTogglePassword: ${VITE_qubitTogglePassword}
+        VITE_adminUsername: ${VITE_adminUsername}
     container_name: acf-demo-frontend
-    volumes:
-      - .:/app
-      - /app/node_modules
     ports:
-      - "5173:5173"
+      - "8080:8080"
+    restart: unless-stopped

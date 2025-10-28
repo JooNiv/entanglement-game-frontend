@@ -1,17 +1,34 @@
-FROM node:24.10
+FROM node:24.10 AS build
 
 WORKDIR /app
 
-# Copy package files first to leverage docker layer caching
+ARG VITE_backendUrl=""
+ENV VITE_backendUrl=${VITE_backendUrl}
+
+ARG VITE_qubitTogglePassword="password"
+ENV VITE_qubitTogglePassword=${VITE_qubitTogglePassword}
+
+ARG VITE_adminUsername="admin"
+ENV VITE_adminUsername=${VITE_adminUsername}
+
+# copy package files first for layer caching
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --silent || npm install --silent
+# install production and build-time deps
+RUN npm ci --silent
 
-# Copy source
+# copy source and build
 COPY . .
+RUN npm run build
 
-EXPOSE 5173
+FROM nginx:stable-alpine AS runtime
 
-# Run dev server; Vite binds to 0.0.0.0 with --host
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# copy built static assets from builder
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# copy custom nginx config for SPA routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

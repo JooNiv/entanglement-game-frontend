@@ -51,7 +51,7 @@ function App() {
       } while (newQ2 === q1);
       setQ2(newQ2);
     }
-    
+
     const cookies = document.cookie.split(";").map(cookie => cookie.trim());
     const adminCookie = cookies.find(cookie => cookie.startsWith(`${adminUsername}=true`));
     if (adminCookie) {
@@ -139,7 +139,7 @@ function App() {
     }
 
     if (!validInput) return;
-    
+
     if (status !== "" && status !== "done") return; // prevent multiple submissions
 
     setStatus("queued");
@@ -177,7 +177,25 @@ function App() {
       }
 
       // Connect WebSocket for updates
-      const ws = new WebSocket(`ws://localhost:8000/ws/${task_id}`);
+      let wsUrl;
+      if (backendUrl) {
+        try {
+          const u = new URL(backendUrl);
+          const proto = u.protocol === "https:" ? "wss:" : "ws:";
+          const base = u.pathname.replace(/\/$/, ""); // preserve any base path
+          wsUrl = `${proto}//${u.host}${base}/ws/${task_id}`;
+        } catch (err) {
+          // fallback if backendUrl is not a full URL
+          const cleaned = backendUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+          const proto = backendUrl.startsWith("https") ? "wss:" : "ws:";
+          wsUrl = `${proto}//${cleaned}/ws/${task_id}`;
+        }
+      } else {
+        // same-origin fallback
+        const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+        wsUrl = `${proto}//${window.location.host}/ws/${task_id}`;
+      }
+      const ws = new WebSocket(wsUrl);
 
       ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
@@ -311,7 +329,7 @@ function App() {
 
           <div id="bell-circuit" className="h-min col-span-1 border border-gray-200 p-4 rounded-lg shadow-lg">
             <p className="text-2xl font-bold">Optimal circuit</p>
-            <img src="./src/bell-circuit.png" alt="Bell Circuit" />
+            <img src="/bell-circuit.png" alt="Bell Circuit" />
           </div>
         </div>
 
