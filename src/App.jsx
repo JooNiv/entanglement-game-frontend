@@ -243,9 +243,9 @@ function App() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 p-2 sm:p-6 mb-4 sm:mb-12">
-      <div className="flex flex-col gap-0 sm:gap-6 w-full">
+      <div className="flex flex-col gap-6 sm:gap-6 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-6">
-          <div id="input" className="col-span-1 border border-gray-200 p-4 sm:p-4 rounded-lg shadow-lg">
+          <div id="input" className="col-span-1 border border-gray-200 p-2 sm:p-4 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold">Choose Your Qubits</h2>
             <form onSubmit={handleSubmit} className="mt-4">
               <label>
@@ -378,12 +378,12 @@ function App() {
         </div>
       </div>
       <div className="w-full lg:w-[70%] 2xl:w-[100%] h-min">
-        <div id="leaderboard" className="h-min border border-gray-200 pl-4 sm:pl-4 p-4 rounded-lg shadow-lg">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-            <h2 className="text-2xl pl-2 pb-2 sm:pl-0 sm:pb-0 font-bold">Leaderboard</h2>
-            <div className="flex">
-              {isAdmin && (<CButton onClick={handleSetShowQubits} className="ml-2 mb-2">Show Qubits</CButton>)}
-              <CButton onClick={fetchLeaderboard} className="ml-2 mb-2">Refresh</CButton>
+        <div id="leaderboard" className="h-min border border-gray-200 p-2 sm:p-4 rounded-lg shadow-lg">
+          <div className="flex flex-row flex-wrap sm:flex-row items-start sm:items-center justify-between">
+            <h2 className="text-2xl pb-2 sm:pl-0 sm:pb-0 font-bold">Leaderboard</h2>
+            <div className="flex gap-4">
+              {isAdmin && (<CButton onClick={handleSetShowQubits} className="ml-0 sm:ml-2 mb-2">Show Qubits</CButton>)}
+              <CButton onClick={fetchLeaderboard} className="ml-0 sm:ml-2 mb-2">Refresh</CButton>
             </div>
           </div>
           {leaderboard.length === 0 ? (
