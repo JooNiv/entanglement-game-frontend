@@ -49,7 +49,7 @@ function MainApp() {
         <div className='flex flex-row w-full justify-start sm:justify-end items-center'>
           <CButton
             type="button"
-            className='flex items-center p-2 sm:m-6'
+            className='flex items-center m-2 sm:m-6'
             onClick={() => setShowQRModal(true)}
           >
             QR Code
