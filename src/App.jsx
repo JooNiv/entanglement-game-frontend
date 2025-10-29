@@ -284,6 +284,8 @@ function App() {
                   <CTextField
                     type="number"
                     value={q2}
+                    valid={validQubits}
+                    validation=""
                     onChangeValue={(e) => setQ2(Number(e.target.value))}
                     min="1"
                     max="54"
