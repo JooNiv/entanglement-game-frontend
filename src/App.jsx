@@ -20,6 +20,7 @@ function App() {
   const [showQubits, setShowQubits] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [validQubits, setValidQubits] = useState(q1 !== q2);
+  const [error, setError] = useState("");
   const [options, setOptions] = useState({
     itemCount: leaderboard.length,
     itemsPerPage: 5,
@@ -112,6 +113,7 @@ function App() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    setError("");
     var validInput = true;
 
     if (q1 === q2) {
@@ -127,6 +129,7 @@ function App() {
 
     if (!validInput) return;
 
+
     if (status !== "" && status !== "done") return; // prevent multiple submissions
 
     setStatus("queued");
@@ -135,6 +138,7 @@ function App() {
     setResult(null);
     setImage(null);
     setIsDone(0);
+    setValidQubits(true);
 
     try {
       // Send the job request
@@ -151,6 +155,7 @@ function App() {
       // Only start websocket on successful response
       if (!res.ok) {
         const errMsg = data?.detail || `Submission failed (${res.status})`;
+        setError(errMsg);
         setStatus("");
         setSubmitted(false);
         return;
@@ -269,8 +274,8 @@ function App() {
                     valid={validQubits}
                     validation="Qubits must be different"
                     onChangeValue={(e) => setQ1(Number(e.target.value))}
-                    min="0"
-                    max="53"
+                    min="1"
+                    max="54"
                     style={{ marginLeft: 8, width: 50 }}
                   />
                 </label>
@@ -280,8 +285,8 @@ function App() {
                     type="number"
                     value={q2}
                     onChangeValue={(e) => setQ2(Number(e.target.value))}
-                    min="0"
-                    max="53"
+                    min="1"
+                    max="54"
                     style={{ marginLeft: 8, width: 50 }}
                   />
                 </label>
@@ -294,6 +299,9 @@ function App() {
               >
                 Execute On Q50
               </CButton>
+              {error && (
+                <p className="text-red-600 mt-2">{error}</p>
+              )}
               {submitted && (<>
                 <CSteps className="mt-6 font-semibold" v-model="step" value={steps[status]}>
                   <CStep>Queued</CStep>
