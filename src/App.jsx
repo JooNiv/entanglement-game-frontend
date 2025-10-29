@@ -22,9 +22,9 @@ function App() {
   const [validQubits, setValidQubits] = useState(q1 !== q2);
   const [options, setOptions] = useState({
     itemCount: leaderboard.length,
-    itemsPerPage: 10,
+    itemsPerPage: 5,
     currentPage: 1,
-    pageSizes: [10, 15, 20, 40]
+    pageSizes: [5, 10, 15, 20, 40]
   });
   const resultsRef = useRef(null);
   const selectedRef = useRef(null);
@@ -101,7 +101,7 @@ function App() {
   const onPageChange = (newOptions) => {
     setOptions(prev => ({ ...prev, ...newOptions }));
 
-    
+
   };
 
   // Keep pagination itemCount in sync with number of leaderboard entries
@@ -398,7 +398,7 @@ function App() {
                 className="hidden sm:flex"
               />
               <CPagination
-                value={options}
+                value={{ ...options }}
                 hideDetails
                 onChangeValue={onPageChange}
                 control
@@ -444,17 +444,36 @@ function App() {
                         </tr>
                       )
                     })}
-                    </tbody>
-                  </table>
-                  </CTable>
-                  <CButton className="self-start mt-2 sm:mt-4" onClick={() => {
+                  </tbody>
+                </table>
+              </CTable>
+              <div className="w-full flex justify-between">
+                <CButton className=" mt-2 sm:mt-4" onClick={() => {
                   const el = document.getElementById('leaderboard');
                   el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}>Scroll up</CButton>
-                </div>
+                }}>Scroll up</CButton>
+
+                {isAdmin && (
+                  <CButton danger className=" mt-2 sm:mt-4" onClick={async () => {
+                    try {
+                      const ok = window.confirm("Are you sure you want to reset the leaderboard? This action cannot be undone.");
+                      if (!ok) return;
+                      const res = await fetch(`${backendUrl}/reset`, { method: "DELETE" });
+                      const data = await res.json();
+                      if (data?.leaderboard) {
+                        setLeaderboard(data.leaderboard);
+                      }
+                    } catch (err) {
+                      console.error("Failed to reset leaderboard:", err);
+                    }
+                  }} >RESET</CButton>
                 )}
               </div>
-              {/* Selected run bar plot */}
+
+            </div>
+          )}
+        </div>
+        {/* Selected run bar plot */}
         {(selectedResult) && (
           <div ref={selectedRef} className="w-full mt-4 border border-gray-200 p-4 rounded-lg shadow-lg">
             <div className="flex items-center justify-between">
