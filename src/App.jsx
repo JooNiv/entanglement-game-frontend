@@ -3,7 +3,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { CButton, CTable, CTextField, CSteps, CStep, CProgressBar, CPagination } from '@cscfi/csc-ui-react'
 import "./App.css"
 
-function App() {
+function App({ isAdmin, token, activeDevice }) {
   const [username, setUsername] = useState("");
   const [q1, setQ1] = useState(() => Math.floor(Math.random() * 54));
   const [q2, setQ2] = useState(() => Math.floor(Math.random() * 54));
@@ -18,7 +18,6 @@ function App() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [showQubits, setShowQubits] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [validQubits, setValidQubits] = useState(q1 !== q2);
   const [error, setError] = useState("");
   const [options, setOptions] = useState({
@@ -37,8 +36,6 @@ function App() {
     "done": 5,
   }
 
-  const adminUsername = import.meta.env.VITE_adminUsername || "admin";
-  const qubitTogglePassword = import.meta.env.VITE_qubitTogglePassword || "password";
   const backendUrl = import.meta.env.VITE_backendUrl || "";
 
   useEffect(() => {
@@ -50,26 +47,7 @@ function App() {
       } while (newQ2 === q1);
       setQ2(newQ2);
     }
-
-    const cookies = document.cookie.split(";").map(cookie => cookie.trim());
-    const adminCookie = cookies.find(cookie => cookie.startsWith(`${adminUsername}=true`));
-    if (adminCookie) {
-      setIsAdmin(true);
-    }
   }, []);
-
-  useEffect(() => {
-    {
-      const params = new URLSearchParams(window.location.search);
-      const adminParam = params.get(adminUsername);
-      if (adminParam === qubitTogglePassword) {
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 7);
-        document.cookie = `${adminUsername}=true; expires=${expires.toUTCString()}; path=/`;
-        window.location.href = "/";
-      }
-    }
-  }, [])
 
   useEffect(() => {
     async function fetchShowQubits() {
@@ -85,10 +63,15 @@ function App() {
     fetchShowQubits();
   }, []);
 
+  function capitalizeFirstLetter(val) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+  }
+
   const handleSetShowQubits = async () => {
     try {
       const res = await fetch(`${backendUrl}/show_qubits`, {
         method: "POST",
+        headers: { "X-Token": token },
       });
       const data = await res.json();
       //console.log("Toggled showQubits to:", data);
@@ -299,7 +282,7 @@ function App() {
                 onClick={(e) => handleSubmit(e)}
                 loading={status !== "" && status !== "done"}
               >
-                Execute On Q50
+                Execute On {capitalizeFirstLetter(activeDevice)}
               </CButton>
               {error && (
                 <p className="text-red-600 mt-2">{error}</p>
@@ -468,7 +451,7 @@ function App() {
                     try {
                       const ok = window.confirm("Are you sure you want to reset the leaderboard? This action cannot be undone.");
                       if (!ok) return;
-                      const res = await fetch(`${backendUrl}/reset`, { method: "DELETE" });
+                      const res = await fetch(`${backendUrl}/reset`, { method: "DELETE", headers: { "X-Token": token } });
                       const data = await res.json();
                       if (data?.leaderboard) {
                         setLeaderboard(data.leaderboard);
