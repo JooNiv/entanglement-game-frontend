@@ -4,13 +4,6 @@ WORKDIR /app
 
 ARG VITE_backendUrl=""
 ENV VITE_backendUrl=${VITE_backendUrl}
-
-ARG VITE_qubitTogglePassword="password"
-ENV VITE_qubitTogglePassword=${VITE_qubitTogglePassword}
-
-ARG VITE_adminUsername="admin"
-ENV VITE_adminUsername=${VITE_adminUsername}
-
 # copy package files first for layer caching
 COPY package.json package-lock.json* ./
 
