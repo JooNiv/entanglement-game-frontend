@@ -5,8 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_backendUrl: ${VITE_backendUrl}
-        VITE_qubitTogglePassword: ${VITE_qubitTogglePassword}
-        VITE_adminUsername: ${VITE_adminUsername}
+
     container_name: acf-demo-frontend
     ports:
       - "8080:8080"
