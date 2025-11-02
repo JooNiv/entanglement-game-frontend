@@ -1,4 +1,4 @@
-import { StrictMode, useState, useEffect, use } from 'react'
+import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { CButton, CModal, CCard, CCardContent, CCardActions, CCardTitle, CTabButtons } from '@cscfi/csc-ui-react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -37,6 +37,7 @@ function MainApp() {
   const [password, setPassword] = useState('')
   const [qxToken, setQxToken] = useState('')
   const [projectId, setProjectId] = useState('')
+  const [currentProjectId, setCurrentProjectId] = useState('')
   const [paused, setPaused] = useState(false)
 
   const currentUrl = window.location.href
@@ -52,6 +53,13 @@ function MainApp() {
   const modalWidths = { small: '90vw', medium: '1400px', large: '50vw' }
 
   useEffect(() => {
+    if (isAdmin){
+      const project_res = fetch(`${backendUrl}/get_project_id`, {
+        method: "GET", headers: { "X-Token": token },
+      }).then(res => res.json()).then(data => {
+        if (data?.project_id) setCurrentProjectId(data.project_id)
+      })
+    }
 
     const device_res = fetch(`${backendUrl}/get_device`, {
       method: "GET",
@@ -125,9 +133,10 @@ function MainApp() {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Token": token },
     });
-    
+
     if (res.ok) {
       alert(`Project ID set to ${projectId}`);
+      setCurrentProjectId(projectId)
     } else {
       alert("Failed to set Project ID");
     }
@@ -137,7 +146,7 @@ function MainApp() {
   const handleSetDevice = async (device) => {
     const res = await fetch(`${backendUrl}/set_device`, {
       body: JSON.stringify({ device }),
-      headers: { "Content-Type": "application/json" , "X-Token": token},
+      headers: { "Content-Type": "application/json", "X-Token": token },
       method: "POST",
     });
 
@@ -154,7 +163,7 @@ function MainApp() {
       setActiveDevice(activeDevice)
       alert("Failed to set device");
     }
-    
+
   }
 
   const handleTogglePause = async () => {
@@ -186,7 +195,13 @@ function MainApp() {
       localStorage.setItem("adminToken", data.token);
       setIsAdmin(true);
       setToken(data.token);
+
       alert("Admin mode activated");
+      const project_res = fetch(`${backendUrl}/get_project_id`, {
+        method: "GET", headers: { "X-Token": data.token },
+      }).then(res => res.json()).then(data => {
+        if (data?.project_id) setCurrentProjectId(data.project_id)
+      })
     } else {
       alert("Invalid credentials");
     }
@@ -197,13 +212,13 @@ function MainApp() {
       <div className='pl-2 pt-6 gap-2 sm:gap-0 sm:pt-0 sm:pl-0 flex flex-col sm:flex-row border-b-4 border-[#006778ff] items-start sm:items-center'>
 
         <h1 className="pl-2 sm:m-6 w-fit sm:w-full text-3xl sm:text-4xl font-bold">Entanglement Game</h1>
-        <div className='flex flex-row flex-wrap w-full justify-start sm:justify-end items-center'>
+        <div className='flex flex-row flex-wrap w-full justify-start sm:justify-end md:flex-nowrap items-center'>
           <CButton
             type="button"
             className='flex items-center m-2 sm:mx-6'
             onClick={() => setShowAdminModal(true)}
           >
-            Admin Login
+            Admin
           </CButton>
           <CButton
             type="button"
@@ -227,7 +242,7 @@ function MainApp() {
         {!isAdmin && (
           <CCard>
             <CCardContent>
-              <CCardTitle className="font-bold">Admin Login</CCardTitle>
+              <CCardTitle className="font-bold">Admin</CCardTitle>
               <div className="flex flex-col gap-2 mt-2">
                 <input
                   className="px-3 py-2 border rounded"
@@ -252,8 +267,8 @@ function MainApp() {
           </CCard>
         )}
         {isAdmin && (
-          <CCard key={activeDevice+ "card"}>
-            <CCardContent key={activeDevice+ "content"}>
+          <CCard key={activeDevice + "card" + currentProjectId}>
+            <CCardContent key={activeDevice + "content" + currentProjectId}>
               <CCardTitle className="font-bold">Admin Mode Active</CCardTitle>
               <p className="mt-2">You are currently logged in as an admin.</p>
               <div className="flex flex-row gap-2 mt-2">
@@ -275,8 +290,9 @@ function MainApp() {
 
               <div className="flex flex-row gap-2 mt-2">
                 <input
+                  key={currentProjectId + "input"}
                   className="px-3 w-full py-2 border rounded"
-                  placeholder="Project ID"
+                  placeholder={currentProjectId != '' ? `${currentProjectId}` : "Project ID"}
                   value={projectId}
                   onChange={e => setProjectId(e.target.value)}
                   autoFocus
@@ -291,12 +307,12 @@ function MainApp() {
               </div>
 
               <div className="flex flex-row gap-2 mt-2">
-                <CTabButtons 
-                  value={activeDevice} 
+                <CTabButtons
+                  value={activeDevice}
                   key={activeDevice}
                   onValueChange={(val) => setActiveDevice(val)}
 
-                  >
+                >
                   <CButton
                     value="q50"
                     type="button"
@@ -345,7 +361,7 @@ function MainApp() {
                 </CButton>
                 <p className='w-full'></p>
               </div>
-              
+
             </CCardContent>
             <CCardActions>
               <CButton
