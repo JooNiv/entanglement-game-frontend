@@ -282,8 +282,6 @@ export const AdminModal = ({ activeDevice, setActiveDevice, showAdminModal, setS
 
     useEffect(() => {
         if (isAdmin) {
-            console.log(token)
-            console.log("gettin project id")
             const project_res = fetch(`${backendUrl}/get_project_id`, {
                 method: "GET", headers: { "X-Token": token },
             }).then(res => res.json()).then(data => {
