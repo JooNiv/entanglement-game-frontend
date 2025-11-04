@@ -22,7 +22,7 @@ const LoginForm = ({ setShowAdminModal, backendUrl, setIsAdmin, setToken, setCur
             setToken(data.token);
 
             alert("Admin mode activated");
-            const project_res = fetch(`${backendUrl}/admin/get_project_id`, {
+            const project_res = fetch(`${backendUrl}/get_project_id`, {
                 method: "GET", headers: { "X-Token": data.token },
             }).then(res => res.json()).then(data => {
                 if (data?.project_id) setCurrentProjectId(data.project_id)
@@ -73,13 +73,15 @@ const LoginForm = ({ setShowAdminModal, backendUrl, setIsAdmin, setToken, setCur
     )
 }
 
-const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProjectId, setCurrentProjectId, token, setIsAdmin, setToken, setShowAdminModal }) => {
+const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProjectId, setCurrentProjectId, token, setIsAdmin, setToken, setShowAdminModal, loading, setLoading }) => {
 
     const [qxToken, setQxToken] = useState('')
     const [projectId, setProjectId] = useState('')
     const [paused, setPaused] = useState(false)
+    
 
     const handleSetQxToken = async () => {
+        setLoading([...loading, "qxToken"])
         const res = await fetch(`${backendUrl}/set_qx_token`, {
             body: JSON.stringify({ qx_token: qxToken }),
             method: "POST",
@@ -91,9 +93,11 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
             alert("Failed to set Qx token. Is the token valid?");
         }
         setQxToken('')
+        setLoading(loading.filter(d => d !== "qxToken"))
     }
 
     const handleSetProjectId = async () => {
+        setLoading([...loading, projectId])
         const res = await fetch(`${backendUrl}/set_project_id`, {
             body: JSON.stringify({ project_id: projectId }),
             method: "POST",
@@ -107,9 +111,11 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
             alert("Failed to set Project ID");
         }
         setProjectId('')
+        setLoading(loading.filter(d => d !== projectId))
     }
 
     const handleSetDevice = async (device) => {
+        setLoading([...loading, device])
         const res = await fetch(`${backendUrl}/set_device`, {
             body: JSON.stringify({ device }),
             headers: { "Content-Type": "application/json", "X-Token": token },
@@ -129,11 +135,12 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
             setActiveDevice(activeDevice)
             alert("Failed to set device");
         }
+        setLoading(loading.filter(d => d !== device))
 
     }
 
     const handleTogglePause = async () => {
-        const res = await fetch(`${backendUrl}/admin/toggle_pause`, {
+        const res = await fetch(`${backendUrl}/toggle_pause`, {
             method: "POST",
             headers: { "X-Token": token },
         });
@@ -159,11 +166,13 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                         value={qxToken}
                         onChange={e => setQxToken(e.target.value)}
                         autoFocus
+                        type='password'
                     />
                     <CButton
                         type="button"
                         onClick={handleSetQxToken}
                         className="ml-auto"
+                        loading={loading.includes("qxToken")}
                     >
                         Set Qx Token
                     </CButton>
@@ -182,6 +191,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                         type="button"
                         onClick={handleSetProjectId}
                         className="ml-auto"
+                        loading={loading.includes(projectId)}
                     >
                         Set Project ID
                     </CButton>
@@ -199,6 +209,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                             type="button"
                             onClick={() => handleSetDevice('q50')}
                             className="ml-auto"
+                            loading={loading.includes('q50')}
                         >
                             Q50
                         </CButton>
@@ -208,6 +219,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                             type="button"
                             onClick={() => handleSetDevice('q5')}
                             className="ml-auto"
+                            loading={loading.includes('q5')}
                         >
                             Helmi
                         </CButton>
@@ -217,6 +229,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                             type="button"
                             onClick={() => handleSetDevice('demo')}
                             className="ml-auto"
+                            loading={loading.includes('demo')}
                         >
                             Demo
                         </CButton>
@@ -226,6 +239,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                             type="button"
                             onClick={() => handleSetDevice('simulator')}
                             className="ml-auto"
+                            loading={loading.includes('simulator')}
                         >
                             Simulator
                         </CButton>
@@ -264,12 +278,13 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
 export const AdminModal = ({ activeDevice, setActiveDevice, showAdminModal, setShowAdminModal, isAdmin, backendUrl, setIsAdmin, token, setToken }) => {
 
     const [currentProjectId, setCurrentProjectId] = useState('')
+    const [loading, setLoading] = useState([])
 
     useEffect(() => {
         if (isAdmin) {
             console.log(token)
             console.log("gettin project id")
-            const project_res = fetch(`${backendUrl}/admin/get_project_id`, {
+            const project_res = fetch(`${backendUrl}/get_project_id`, {
                 method: "GET", headers: { "X-Token": token },
             }).then(res => res.json()).then(data => {
                 if (data?.project_id) setCurrentProjectId(data.project_id)
@@ -278,7 +293,7 @@ export const AdminModal = ({ activeDevice, setActiveDevice, showAdminModal, setS
     }, [showAdminModal]);
 
     return (
-        <CModal value={showAdminModal} dismissable onChangeValue={e => setShowAdminModal(e.detail)}>
+        <CModal value={showAdminModal} dismissable={loading.length === 0} onChangeValue={e => setShowAdminModal(e.detail)}>
             {!isAdmin && (
                 <LoginForm 
                     setShowAdminModal={setShowAdminModal}
@@ -299,6 +314,8 @@ export const AdminModal = ({ activeDevice, setActiveDevice, showAdminModal, setS
                     setIsAdmin={setIsAdmin}
                     setToken={setToken}
                     setShowAdminModal={setShowAdminModal}
+                    loading={loading}
+                    setLoading={setLoading}
                 />
             )}
         </CModal>
