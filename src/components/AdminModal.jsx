@@ -96,6 +96,21 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
         setLoading(loading.filter(d => d !== "qxToken"))
     }
 
+    const resetQxToken = async () => {
+        setLoading([...loading, "qxToken"])
+        const res = await fetch(`${backendUrl}/reset_qx_token`, {
+            method: "POST",
+            headers: { "X-Token": token },
+        });
+        if (res.ok) {
+            alert(`Qx token reset`);
+        } else {
+            alert("Failed to reset Qx token. Is the token valid?");
+        }
+        setQxToken('')
+        setLoading(loading.filter(d => d !== "qxToken"))
+    }
+
     const handleSetProjectId = async () => {
         setLoading([...loading, projectId])
         const res = await fetch(`${backendUrl}/set_project_id`, {
@@ -174,7 +189,16 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                         className="ml-auto"
                         loading={loading.includes("qxToken")}
                     >
-                        Set Qx Token
+                        Set
+                    </CButton>
+
+                    <CButton
+                        type="button"
+                        onClick={resetQxToken}
+                        className="ml-auto"
+                        loading={loading.includes("qxToken")}
+                    >
+                        Reset
                     </CButton>
                 </div>
 
@@ -193,7 +217,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                         className="ml-auto"
                         loading={loading.includes(projectId)}
                     >
-                        Set Project ID
+                        Set
                     </CButton>
                 </div>
 
