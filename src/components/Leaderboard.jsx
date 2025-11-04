@@ -73,7 +73,7 @@ export const Leaderboard = ({token, backendUrl,isAdmin, showQubits, setShowQubit
                         className="hidden sm:flex"
                     />
                     <CPagination
-                        value={{ ...options }}
+                        value={options}
                         hideDetails
                         onChangeValue={onPageChange}
                         control
