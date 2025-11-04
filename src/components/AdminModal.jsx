@@ -204,9 +204,9 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
                         </CButton>
 
                         <CButton
-                            value="helmi"
+                            value="q5"
                             type="button"
-                            onClick={() => handleSetDevice('helmi')}
+                            onClick={() => handleSetDevice('q5')}
                             className="ml-auto"
                         >
                             Helmi
@@ -268,13 +268,14 @@ export const AdminModal = ({ activeDevice, setActiveDevice, showAdminModal, setS
     useEffect(() => {
         if (isAdmin) {
             console.log(token)
+            console.log("gettin project id")
             const project_res = fetch(`${backendUrl}/admin/get_project_id`, {
                 method: "GET", headers: { "X-Token": token },
             }).then(res => res.json()).then(data => {
                 if (data?.project_id) setCurrentProjectId(data.project_id)
             })
         }
-    }, []);
+    }, [showAdminModal]);
 
     return (
         <CModal value={showAdminModal} dismissable onChangeValue={e => setShowAdminModal(e.detail)}>
