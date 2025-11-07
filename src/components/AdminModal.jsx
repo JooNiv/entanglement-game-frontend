@@ -78,7 +78,24 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
     const [qxToken, setQxToken] = useState('')
     const [projectId, setProjectId] = useState('')
     const [paused, setPaused] = useState(false)
-    
+
+    useEffect(() => {
+        const fetchPausedState = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/get_paused`, {
+                    method: "GET",
+                    headers: { "X-Token": token },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setPaused(data.paused);
+                }
+            } catch (error) {
+                console.error("Error fetching paused state:", error);
+            }
+        }
+        fetchPausedState();
+    }, []);
 
     const handleSetQxToken = async () => {
         setLoading([...loading, "qxToken"])
