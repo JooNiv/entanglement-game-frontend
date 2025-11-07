@@ -125,6 +125,7 @@ const AdminControls = ({ activeDevice, setActiveDevice, backendUrl, currentProje
             alert("Failed to reset Qx token. Is the token valid?");
         }
         setQxToken('')
+        setActiveDevice("simulator")
         setLoading(loading.filter(d => d !== "qxToken"))
     }
 
