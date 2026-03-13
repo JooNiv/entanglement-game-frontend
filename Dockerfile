@@ -1,4 +1,4 @@
-FROM node:24.10 AS build
+FROM node:25.8 AS build
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm ci --silent
 COPY . .
 RUN npm run build
 
-FROM nginx:stable-alpine AS runtime
+FROM nginx:stable AS runtime
 
 # copy built static assets from builder
 COPY --from=build /app/dist /usr/share/nginx/html
